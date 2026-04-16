@@ -2,7 +2,7 @@ CC = avr-gcc
 
 NAME = main
 
-SRC = $(addsuffix .c, $(NAME))
+SRC = main.c uart/uart.c
 
 F_CPU = 16000000
 

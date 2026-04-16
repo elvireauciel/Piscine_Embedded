@@ -83,7 +83,8 @@ void i2c_init(void) {
 }
 
 void i2c_start(void) {
-  TWCR |= (1 << TWINT); // TWI Interrupt Flag
+   //  initiate transmission of START
+  TWCR |= (1 << TWINT); // TWI Interrupt Flag 
   TWCR |= (1 << TWSTA); // Set TWI START Condition Bit
   // enables TWI operation and activates the TWI interface
   TWCR |= (1 << TWEN);
@@ -103,7 +104,7 @@ int main(void) {
   uart_init();
   i2c_init();
   i2c_start();
-  return_status = i2c_return_code_desc(TWSR & 0xf8); // mask 11111000
+  return_status = i2c_return_code_desc(TWSR & 0xf8); // mask 0b11111000: Mask prescaler bits.
 
   uart_printstr(return_status);
   uart_printstr("\r\n");

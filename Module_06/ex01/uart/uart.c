@@ -6,7 +6,7 @@
 /*   By: lasablon <lasablon@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/14 14:53:50 by lasablon          #+#    #+#             */
-/*   Updated: 2025/03/17 14:34:09 by lasablon         ###   ########.fr       */
+/*   Updated: 2025/03/15 14:36:35 by lasablon         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,7 +54,11 @@ void uart_tx(char c) {
   UDR0 = c;
 }
 
-void ft_putnbr(uint32_t nbr) {
+void ft_putnbr(int16_t nbr) {
+  if (nbr < 0) {
+    uart_tx('-');
+    nbr = -nbr;
+  }
   if (nbr < 10) {
     uart_tx(nbr + '0');
   } else {
@@ -63,7 +67,7 @@ void ft_putnbr(uint32_t nbr) {
   }
 }
 
-void print_hex_value(unsigned char c) {
+void print_hex_value(char c) {
   char *base;
   base = "0123456789ABCDEF";
   uart_tx(base[c / 16]);

@@ -8,7 +8,7 @@ F_CPU = 16000000
 
 RM = rm -rf
 
-CFLAGS = -Os -Wall -Wextra -Werror  -mmcu=atmega328p -DF_CPU=$(F_CPU)
+CFLAGS = -Os -Wall -Wextra -Werror -Iuart -mmcu=atmega328p -DF_CPU=$(F_CPU)
 
 ELF = $(NAME).elf
 HEX = $(NAME).hex

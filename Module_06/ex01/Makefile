@@ -2,13 +2,18 @@ CC = avr-gcc
 
 NAME = main
 
-SRC = $(addsuffix .c, $(NAME) uart)
+SRC = main.c uart/uart.c i2c/i2c.c 
 
 F_CPU = 16000000
 
+BAUD = 115200
+
+PORT ?= /dev/ttyUSB0
+
 RM = rm -rf
 
-CFLAGS = -Os -Wall -Wextra -Werror -Iuart -mmcu=atmega328p -DF_CPU=$(F_CPU)
+CPPFLAGS = -Iuart -Ii2c -DF_CPU=$(F_CPU) -DFOSC=$(F_CPU) -DBAUD=$(BAUD)
+CFLAGS = -Os -Wall -Wextra -Werror -mmcu=atmega328p 
 
 ELF = $(NAME).elf
 HEX = $(NAME).hex
@@ -16,21 +21,26 @@ BIN = $(NAME).bin
 
 OBJS = $(SRC:%.c=%.o)
 
-all: hex flash
+.PHONY: all clean re flash hex bin
+
+all: hex
 
 hex: $(ELF)
-	avr-objcopy -O ihex $^ $(HEX)
+	avr-objcopy -O ihex $< $(HEX)
+
+bin: $(ELF)
+	avr-objcopy -O binary $< $(BIN)
 
 $(ELF): $(OBJS)
-	$(CC) $(CFLAGS) $^ -o $@
+	$(CC) $(CPPFLAGS) $(CFLAGS) $^ -o $@
 
 %.o: %.c
-	$(CC) $(CFLAGS) -c $< -o $@
+	$(CC) $(CPPFLAGS) $(CFLAGS) -c $< -o $@
 
-flash:
-	avrdude -p m328p -b 115200 -c arduino -P /dev/ttyUSB0 -U flash:w:$(HEX)
+flash: hex
+	avrdude -p m328p -b $(BAUD) -c arduino -P $(PORT) -U flash:w:$(HEX)
 
 clean:
-	$(RM) $(OBJS) $(ELF) $(HEX)
+	$(RM) $(OBJS) $(ELF) $(HEX) $(BIN)
 
 re: clean all

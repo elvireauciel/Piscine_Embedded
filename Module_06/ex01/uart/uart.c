@@ -1,15 +1,3 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   uart.c                                             :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: lasablon <lasablon@student.42.fr>          +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/03/14 14:53:50 by lasablon          #+#    #+#             */
-/*   Updated: 2025/03/15 14:36:35 by lasablon         ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
-
 #include "uart.h"
 
 void uart_init(void) {
@@ -33,6 +21,14 @@ char uart_rx(void) {
   /* Get and return received data from buffer */
   return (UDR0);
 }
+
+void uart_print_hex_value(unsigned char c) {
+  char *base;
+  base = "0123456789ABCDEF";
+  uart_tx(base[c / 16]);
+  uart_tx(base[c % 16]);
+}
+
 void uart_printstr(const char *str) {
   int i;
 
@@ -46,6 +42,20 @@ void uart_printstr(const char *str) {
   }
 }
 
+void uart_printstr_endl(const char *str) {
+  int i;
+
+  i = 0;
+  while (str[i]) {
+    while (!(UCSR0A & (1 << UDRE0)))
+      ;
+    /*copy data to be sent*/
+    UDR0 = str[i];
+    i++;
+  }
+  uart_printstr("\r\n");
+}
+
 void uart_tx(char c) {
   /* Wait for empty transmit buffer */
   while (!(UCSR0A & (1 << UDRE0)))
@@ -54,7 +64,7 @@ void uart_tx(char c) {
   UDR0 = c;
 }
 
-void ft_putnbr(int16_t nbr) {
+void uart_ft_putnbr(int16_t nbr) {
   if (nbr < 0) {
     uart_tx('-');
     nbr = -nbr;
@@ -62,8 +72,8 @@ void ft_putnbr(int16_t nbr) {
   if (nbr < 10) {
     uart_tx(nbr + '0');
   } else {
-    ft_putnbr(nbr / 10);
-    ft_putnbr(nbr % 10);
+    uart_ft_putnbr(nbr / 10);
+    uart_ft_putnbr(nbr % 10);
   }
 }
 

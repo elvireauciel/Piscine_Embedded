@@ -23,6 +23,7 @@ void write_uint32(uint32_t num) {
 
 void trigger_measurement(void) {
   i2c_start();
+
   i2c_write((SENSOR_ADDRESS << 1) | TW_WRITE);
   i2c_write(0xAC); // trigger measurement 0xAC
   i2c_write(0x33);
@@ -50,19 +51,11 @@ void verify_calibration(void) {
 }
 
 double calculate_humidity(uint8_t *data) {
-  uint32_t humidity;
-  // uart_print_hex_value((uint32_t)data[1]);
-  // uart_printstr(" ");
-  // uart_print_hex_value(((uint32_t)data[2]));
-  // uart_printstr(" ");
-  // uart_print_hex_value(((uint32_t)data[3]) >> 4);
-  // uart_printstr(" ");
-  // uart_printstr("\r\n");
-
-  humidity = ((uint32_t)data[1] << 12) | ((uint32_t)data[2] << 4) |
-             ((uint32_t)data[3] >> 4);
-  float denominator = 1048576.0f;
-  return ((humidity / denominator) * 100.0f);
+  uint32_t humidity = 0;
+  humidity += (uint32_t)(data[1]) << 12;
+  humidity += (uint32_t)(data[2]) << 4;
+  humidity += (uint32_t)(data[3]) >> 4;
+  return ((humidity / 1048576.0f) * 100.0f);
 }
 
 double calculate_temp(uint8_t *data) {
@@ -86,19 +79,8 @@ int main(void) {
 
   while (1) {
     trigger_measurement();
-    i2c_start();
-    i2c_write((SENSOR_ADDRESS << 1) | TW_READ);
-
-    for (int i = 0; i < 7; i++) {
-      i2c_read();
-      data[i] = TWDR;
-      // uart_print_hex_value(data[i]);
-      // uart_printstr(" ");
-    }
-
-    uart_printstr_endl("");
+    i2c_read(data, SENSOR_ADDRESS);
     i2c_stop();
-
     dtostrf(calculate_humidity(data), 4, 2, humidity);
     uart_printstr("Humidity: ");
     uart_printstr(humidity);
@@ -108,7 +90,6 @@ int main(void) {
     uart_printstr("Temperature: ");
     uart_printstr(temp);
     uart_printstr_endl("C");
-
     _delay_ms(2000);
   }
 }

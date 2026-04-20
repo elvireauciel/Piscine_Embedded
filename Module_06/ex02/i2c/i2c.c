@@ -43,10 +43,7 @@ void i2c_read(uint8_t *data, uint8_t sensor_address) {
     TWCR = (1 << TWINT) | (1 << TWEN) | (1 << TWEA);
     i2c_wait_transmission();
     data[i] = TWDR;
-    // uart_print_hex_value(data[i]);
-    // uart_printstr(" ");
   }
-  //   uart_printstr_endl("");
 }
 
 void i2c_write(unsigned char data) {

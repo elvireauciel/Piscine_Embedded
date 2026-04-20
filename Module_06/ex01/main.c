@@ -24,6 +24,7 @@ void trigger_measurement(void) {
 int main(void) {
   int i = 0;
   unsigned char calibration_bit;
+  uint8_t data[7] = {0};
 
   uart_init();
   _delay_ms(40); // delay required after power-on
@@ -37,22 +38,13 @@ int main(void) {
 
   while (1) {
     trigger_measurement();
-    i2c_start();
-    _delay_ms(80);
-    // waits for measurement completed (bit 7 is the busy indicator)
-    while ((TWSR & (1 << 7)))
-      ;
-
-    // load sensor address with read bit
-    i2c_write((SENSOR_ADDRESS << 1) | TW_READ);
-
-    // proceeds to read 7 bytes
+    i2c_read(data, SENSOR_ADDRESS);
     for (i = 0; i < 7; i++) {
-      i2c_read();
-      uart_print_hex_value(TWDR);
+      uart_print_hex_value(data[i]);
       uart_tx(' ');
     }
     uart_printstr_endl("");
     i2c_stop();
+    _delay_ms(1000);
   }
 }

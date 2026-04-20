@@ -1,4 +1,5 @@
 #include "i2c.h"
+#include <stdint.h>
 
 void i2c_init(void) {
   TWSR = 0;    // set prescaler at 1
@@ -34,9 +35,15 @@ void i2c_print_status(uint8_t status) {
   uart_printstr("\r\n");
 }
 
-void i2c_read(void) {
-  TWCR = (1 << TWINT) | (1 << TWEN);
-  i2c_wait_transmission();
+void i2c_read(uint8_t *data, uint8_t sensor_address) {
+  i2c_start();
+  i2c_write((sensor_address << 1) | TW_READ);
+
+  for (int i = 0; i < 7; i++) {
+    TWCR = (1 << TWINT) | (1 << TWEN) | (1 << TWEA);
+    i2c_wait_transmission();
+    data[i] = TWDR;
+  }
 }
 
 void i2c_write(unsigned char data) {
